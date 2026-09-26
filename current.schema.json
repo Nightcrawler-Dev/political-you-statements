@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nightcrawler-dev.github.io/political-you-statements/current.schema.json",
+  "title": "Political You: Current Statements batch",
+  "description": "One monthly batch of recent, sourced, dated public statements from the four parties on each of the 7 quiz topics. Balance rules that JSON Schema cannot express (all four parties on every topic with an equal count of 1 or 2 each, the date window, SAMPLE markers) are enforced by workbench/validate_statements.py.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "batchMonth",
+    "published",
+    "sample",
+    "statements"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "batchMonth": {
+      "description": "The month this batch was curated, YYYY-MM.",
+      "type": "string",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$"
+    },
+    "published": {
+      "description": "true only in the approved, live batch. The app ignores a downloaded file unless this is true.",
+      "type": "boolean"
+    },
+    "sample": {
+      "description": "true only for placeholder data. Sample files must not be published, and every sample quote and speaker must contain the word SAMPLE.",
+      "type": "boolean"
+    },
+    "notes": {
+      "description": "Optional free text for reviewers. Not shown in the app.",
+      "type": "string"
+    },
+    "statements": {
+      "type": "array",
+      "maxItems": 56,
+      "items": {
+        "$ref": "#/$defs/statement"
+      }
+    }
+  },
+  "$defs": {
+    "isoDate": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$"
+    },
+    "statement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "topicId",
+        "partyId",
+        "speaker",
+        "speakerTitle",
+        "quote",
+        "date",
+        "sourceUrl",
+        "sourceTitle",
+        "verifiedAt"
+      ],
+      "properties": {
+        "id": {
+          "description": "Unique in the batch. Suggested form: <batchMonth>-<topicId>-<partyId>-<n>, for example 2026-10-courts-justices-green-1.",
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{2,80}$"
+        },
+        "topicId": {
+          "description": "Quiz topic (see data/topics.json). Every topic needs all four parties, 1 or 2 statements each, the same count for every party.",
+          "type": "string",
+          "enum": [
+            "courts-justices",
+            "safety-security",
+            "trust-democracy",
+            "jobs-prices",
+            "borders-immigration",
+            "health-care-access",
+            "abortion-choice"
+          ]
+        },
+        "partyId": {
+          "type": "string",
+          "enum": [
+            "green",
+            "libertarian",
+            "democratic",
+            "republican"
+          ]
+        },
+        "speaker": {
+          "description": "Person or body quoted, for example a named official or the party's national committee.",
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "speakerTitle": {
+          "description": "Role at the time of the statement, for example 'Chair, Libertarian National Committee'.",
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 160
+        },
+        "quote": {
+          "description": "Exact words from the source, without surrounding quotation marks. Use an ellipsis (…) for cuts. No paraphrase.",
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 600
+        },
+        "date": {
+          "description": "Date the statement was made or published, YYYY-MM-DD. Must be within about 12 months of the batch.",
+          "$ref": "#/$defs/isoDate"
+        },
+        "sourceUrl": {
+          "description": "Primary or reputable source that shows the exact quote. https only.",
+          "type": "string",
+          "pattern": "^https://[^\\s]+$",
+          "maxLength": 500
+        },
+        "sourceTitle": {
+          "description": "Title of the page or document and its publisher, for example 'Statement on the Supreme Court vacancy (Green Party US press release)'.",
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 200
+        },
+        "verifiedAt": {
+          "description": "Date someone opened sourceUrl and confirmed the quote word for word, YYYY-MM-DD. On or after date.",
+          "$ref": "#/$defs/isoDate"
+        }
+      }
+    }
+  }
+}

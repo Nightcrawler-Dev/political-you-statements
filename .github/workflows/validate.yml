@@ -1,0 +1,48 @@
+name: Validate statements
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install jsonschema
+        run: pip install jsonschema
+      - name: Check the schema is valid
+        run: |
+          python - <<'PY'
+          import json
+          from jsonschema import Draft202012Validator
+          schema = json.load(open("current.schema.json", encoding="utf-8"))
+          Draft202012Validator.check_schema(schema)
+          print("current.schema.json is a valid draft 2020-12 schema")
+          PY
+      - name: Validate current.json
+        run: |
+          if [ -f current.json ]; then
+            python tools/validate_statements.py current.json
+          else
+            echo "No current.json yet (the app treats a missing file like an unpublished one). Nothing to validate."
+          fi
+      - name: Require a real, published batch on main
+        if: hashFiles('current.json') != ''
+        run: |
+          python - <<'PY'
+          import json, sys
+          d = json.load(open("current.json", encoding="utf-8"))
+          if d.get("sample") is not False:
+              sys.exit("ERROR: current.json must have \"sample\": false")
+          if d.get("published") is not True:
+              print("NOTE: \"published\" is not true, so the app will ignore this file.")
+          PY
