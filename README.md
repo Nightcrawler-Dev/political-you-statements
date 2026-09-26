@@ -14,7 +14,8 @@ There is no `current.json` yet. Until the first approved batch is merged, the ap
 1. Draft `current.json` on a new branch, following the schema. Set `batchMonth` (e.g. `"2026-10"`), `"published": true` and `"sample": false`.
 2. Run `pip install jsonschema` and `python3 tools/validate_statements.py current.json`, then fix every ERROR.
 3. Open a pull request titled "Statements for <Month Year>". The **Validate statements** check runs on every pull request.
-4. The owner reviews the quotes against their sources. **Merging the pull request to `main` is the approval.** GitHub Pages publishes it within a few minutes, and phones pick it up on their next launch.
+4. **Independent review.** A checker separate from the collector re-verifies every quote, date, title and context against the source. It scores each topic 1–5 for same issue, speaker prominence, and tone, and anything at 2 or below is fixed or the topic is dropped. The scorecard is saved as `reviews/<batchMonth>.md` in the same pull request.
+5. When the review and the check both pass, the pull request is squash-merged. Approval is delegated by the owner, who gets a summary afterward. GitHub Pages publishes it within a few minutes, and phones pick it up on their next launch.
 
 ## Rules for every batch
 
