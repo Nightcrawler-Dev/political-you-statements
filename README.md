@@ -1,6 +1,6 @@
 # Political You — Current Statements
 
-This public repo holds the **approved monthly statements** shown in the Political You app's *Current Statements* section. Each batch contains short, dated, sourced public statements from the four parties (Green, Libertarian, Democratic, Republican) on each of the app's 7 quiz topics.
+This public repo holds the **approved monthly statements** shown in the Political You app's *Current Statements* section. Each batch contains short, dated, sourced public statements from the four parties (Green, Libertarian, Democratic, Republican) on the app's 7 quiz topics.
 
 The app downloads one static file:
 
@@ -18,7 +18,8 @@ There is no `current.json` yet. Until the first approved batch is merged, the ap
 
 ## Rules for every batch
 
-- **Balance:** every one of the 7 topics has all four parties, with the same number of statements per party, either 1 each or 2 each (28–56 statements in total). A missing topic or party fails the check.
+- **Balance: a topic is all four parties or none.** A topic may be left out for a month. A topic that is present has all four parties, with the same number of statements per party, either 1 each or 2 each. A topic with a missing party fails the check, and so does a batch with no topics (so 4–56 statements). The app shows an absent topic as "No statements for this topic this month."
+- `batchMonth` may be next month, so a batch can be prepared late in the month before.
 - **Exact words:** quotes are copied word for word. Cuts are marked with an ellipsis (…). No paraphrases.
 - **Sourced and dated:** every statement has an `https` source link, the statement's `date`, and `verifiedAt` (the day the quote was checked against the source). Dates should be within about 12 months of the batch month.
 - Topics (`topicId`): `courts-justices`, `safety-security`, `trust-democracy`, `jobs-prices`, `borders-immigration`, `health-care-access`, `abortion-choice`.

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://nightcrawler-dev.github.io/political-you-statements/current.schema.json",
   "title": "Political You: Current Statements batch",
-  "description": "One monthly batch of recent, sourced, dated public statements from the four parties on each of the 7 quiz topics. Balance rules that JSON Schema cannot express (all four parties on every topic with an equal count of 1 or 2 each, the date window, SAMPLE markers) are enforced by workbench/validate_statements.py.",
+  "description": "One monthly batch of recent, sourced, dated public statements from the four parties on each of the 7 quiz topics. Balance rules that JSON Schema cannot express (a topic is all four parties or none: a topic may be left out, but a topic that is present needs all four parties with an equal count of 1 or 2 each; at least one topic; the date window; SAMPLE markers) are enforced by workbench/validate_statements.py.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -35,6 +35,7 @@
     },
     "statements": {
       "type": "array",
+      "minItems": 4,
       "maxItems": 56,
       "items": {
         "$ref": "#/$defs/statement"
@@ -68,7 +69,7 @@
           "pattern": "^[a-z0-9][a-z0-9-]{2,80}$"
         },
         "topicId": {
-          "description": "Quiz topic (see data/topics.json). Every topic needs all four parties, 1 or 2 statements each, the same count for every party.",
+          "description": "Quiz topic (see data/topics.json). A topic may be left out for a month; if present it needs all four parties, 1 or 2 statements each, the same count for every party.",
           "type": "string",
           "enum": [
             "courts-justices",

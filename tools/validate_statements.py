@@ -8,10 +8,13 @@ against current.schema.json (next to the file, else statements/).
 
 Rules (docs/STATEMENTS_WORKFLOW.md):
 - Structure and field formats match statements/current.schema.json.
-- Balance: statements are keyed by topic (the 7 quiz topics). Every topic
-  must have all four parties, with the same number of statements for each
-  party: 1 each or 2 each. A missing topic or a missing party is an error.
+- Balance: statements are keyed by topic (the 7 quiz topics). A topic is
+  all four parties or none: a topic may be left out for a month, but a topic
+  that is present must have all four parties, with the same number of
+  statements for each party (1 each or 2 each). A missing party is an error.
+  The batch must cover at least one topic.
 - Every statement has an https source URL, a source title, and a date.
+- batchMonth is no later than next month (a batch may be prepared ahead).
 - Dates fall within about 12 months: no earlier than 365 days before the
   end of the batch month, not after the batch month, and not in the future.
   A published batch must also be no more than 365 days old today.
@@ -121,8 +124,11 @@ def validate(path: Path = DEFAULT_FILE, today: date | None = None, root: Path = 
         year, month = int(batch[:4]), int(batch[5:])
         batch_end = date(year, month, calendar.monthrange(year, month)[1])
         batch_start = date(year, month, 1)
-        if batch_start > today:
-            errors.append(f"{label}: batchMonth {batch} is in the future")
+        # A batch may be prepared late in the month before (e.g. the October
+        # batch in late September), but no further ahead than next month.
+        next_month = date(today.year + today.month // 12, today.month % 12 + 1, 1)
+        if batch_start > next_month:
+            errors.append(f"{label}: batchMonth {batch} is more than one month ahead")
         if published is True and (today - batch_end).days > WINDOW_DAYS:
             errors.append(f"{label}: published batch {batch} is more than 12 months old; publish a new batch")
     else:
@@ -215,7 +221,7 @@ def validate(path: Path = DEFAULT_FILE, today: date | None = None, root: Path = 
         per_party = counts.get(topic, Counter())
         present = {p: per_party[p] for p in PARTIES if per_party[p] > 0}
         if not present:
-            errors.append(f"{topic}: no statements; every topic needs all four parties")
+            warnings.append(f"{topic}: left out this month (allowed: all four parties or none)")
             continue
         covered += 1
         missing = [p for p in PARTIES if p not in present]
@@ -227,6 +233,9 @@ def validate(path: Path = DEFAULT_FILE, today: date | None = None, root: Path = 
         too_many = [p for p, n in present.items() if n > MAX_PER_PARTY]
         if too_many:
             errors.append(f"{topic}: more than {MAX_PER_PARTY} statements for {too_many}")
+
+    if covered == 0:
+        errors.append(f"{label}: no topics; a batch needs at least one topic with all four parties")
 
     summary = (f"{label}: batch {batch}, published={published}, sample={sample}, "
                f"{len(statements)} statement(s) across {covered} of {len(topics)} topic(s)")
